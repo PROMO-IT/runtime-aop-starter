@@ -1,5 +1,6 @@
 package ru.promoit.bpp;
 
+import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Lazy;
@@ -8,6 +9,7 @@ import ru.promoit.invoke.ProxyBuilder;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class AspectInvokeBeanPostProcessor implements BeanPostProcessor {
     private final List<AspectInvoker> invokers;
@@ -19,11 +21,11 @@ public class AspectInvokeBeanPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        AspectInvoker aspectInvoker = invokers.stream().filter(invoker -> bean.getClass().equals(invoker.getClazz())).findFirst().orElse(null);
-        if (Objects.isNull(aspectInvoker)) {
+        List<MethodInterceptor> aspectInvokers = invokers.stream().filter(invoker -> bean.getClass().equals(invoker.getClazz())).collect(Collectors.toList());
+        if (aspectInvokers.isEmpty()) {
             return BeanPostProcessor.super.postProcessAfterInitialization(bean, beanName);
         }
-        Object obj =  ProxyBuilder.build(bean, aspectInvoker);
+        Object obj =  ProxyBuilder.build(bean, aspectInvokers);
         return obj;
     }
 }
