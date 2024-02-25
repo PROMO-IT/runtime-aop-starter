@@ -22,19 +22,13 @@ import java.util.List;
 public class AopConfiguration {
     @Bean
     public BeanPostProcessor aspectInvokeBpp(BeanFactory beanFactory) throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-
         GroovyClassLoader loader = new GroovyClassLoader();
         //Class aClass = loader.parseClass(new File("src/main/java/ru/promoit/component/BeforeAspect1.groovy"));
         Class<?> aClass = loader.loadClass("ru.promoit.component.BeforeAspect1");
         BeforeAspect<TestComponent1> beforeAspect1 = (BeforeAspect<TestComponent1>) aClass.getDeclaredConstructor(null).newInstance();
 
-        BeforeAspect<TestComponent2> beforeAspect2 = new BeforeAspect<>() {
-            @Override
-            public Object[] beforeAdvice(TestComponent2 obj, Object[] args) throws Throwable {
-                args[0] = (String) args[0] + "bbb";
-                return args;
-            }
-        };
+        aClass = loader.loadClass("ru.promoit.component.BeforeAspect2");
+        BeforeAspect<TestComponent2> beforeAspect2 = (BeforeAspect<TestComponent2>) aClass.getDeclaredConstructor(null).newInstance();
 
         List<AspectInvoker> invokers = Arrays.asList(
                 new AspectInvoker<>(TestComponent1.class, "testMethod1", beforeAspect1, null, null),
