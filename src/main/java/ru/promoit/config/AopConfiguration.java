@@ -1,5 +1,6 @@
 package ru.promoit.config;
 
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,8 +16,8 @@ import java.util.List;
 @Configuration
 public class AopConfiguration {
     @Bean
-    public List<AspectInvoker> invokers(TestComponent1 component1, TestComponent2 component2) {
-        BeforeAspect<TestComponent1> beforeAspect1 = new BeforeAspect<TestComponent1>() {
+    public BeanPostProcessor aspectInvokeBpp(BeanFactory beanFactory) {
+        BeforeAspect<TestComponent1> beforeAspect1 = new BeforeAspect<>() {
             @Override
             public Object[] beforeAdvice(TestComponent1 obj, Object[] args) throws Throwable {
                 String s = (String) args[0];
@@ -25,7 +26,7 @@ public class AopConfiguration {
             }
         };
 
-        BeforeAspect<TestComponent2> beforeAspect2 = new BeforeAspect<TestComponent2>() {
+        BeforeAspect<TestComponent2> beforeAspect2 = new BeforeAspect<>() {
             @Override
             public Object[] beforeAdvice(TestComponent2 obj, Object[] args) throws Throwable {
                 String s = (String) args[0];
@@ -34,14 +35,11 @@ public class AopConfiguration {
             }
         };
 
-        return Arrays.asList(
-            new AspectInvoker<TestComponent1>(component1, "testMethod1",beforeAspect1, null, null),
-            new AspectInvoker<TestComponent2>(component2, "testMethod3",beforeAspect2, null, null)
+        List<AspectInvoker> invokers = Arrays.asList(
+                new AspectInvoker<>(beanFactory, TestComponent1.class, "testMethod1", beforeAspect1, null, null),
+                new AspectInvoker<>(beanFactory, TestComponent2.class, "testMethod3", beforeAspect2, null, null)
         );
-    }
 
-    @Bean
-    public BeanPostProcessor aspectInvokeBpp(List<AspectInvoker> invokers) {
         return new AspectInvokeBeanPostProcessor(invokers);
     }
 }

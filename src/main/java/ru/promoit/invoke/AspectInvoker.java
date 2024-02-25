@@ -1,5 +1,6 @@
 package ru.promoit.invoke;
 
+import org.springframework.beans.factory.BeanFactory;
 import ru.promoit.aspect.AfterAspect;
 import ru.promoit.aspect.BeforeAspect;
 import ru.promoit.aspect.OverrideAspect;
@@ -7,18 +8,21 @@ import ru.promoit.aspect.OverrideAspect;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Objects;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 public class AspectInvoker<T> implements InvocationHandler {
     private final Logger log = Logger.getLogger(this.getClass().getName());
-    private final T obj;
+    private final BeanFactory beanFactory;
+    private final Class<T> clazz;
     private final String methodName;
     private final BeforeAspect<T> beforeAspect;
     private final AfterAspect<T> afterAspect;
     private final OverrideAspect<T> overrideAspect;
 
-    public AspectInvoker(T obj, String methodName, BeforeAspect<T> beforeAspect, AfterAspect<T> afterAspect, OverrideAspect<T> overrideAspect) {
-        this.obj = obj;
+    public AspectInvoker(BeanFactory beanFactory, Class<T> clazz, String methodName, BeforeAspect<T> beforeAspect, AfterAspect<T> afterAspect, OverrideAspect<T> overrideAspect) {
+        this.beanFactory = beanFactory;
+        this.clazz = clazz;
         this.methodName = methodName;
         this.beforeAspect = beforeAspect;
         this.afterAspect = afterAspect;
@@ -27,6 +31,7 @@ public class AspectInvoker<T> implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        T obj = beanFactory.getBean(clazz);
         if (!method.getName().equals(methodName)) {
             return method.invoke(obj, args);
         }
@@ -57,7 +62,7 @@ public class AspectInvoker<T> implements InvocationHandler {
         return result;
     }
 
-    public T getObj() {
-        return obj;
+    public Class<T> getClazz() {
+        return clazz;
     }
 }
