@@ -1,11 +1,13 @@
 package ru.promoit.invoke;
 
-import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.cglib.proxy.MethodInterceptor;
+
+import org.aopalliance.intercept.MethodInterceptor;
+import org.springframework.aop.framework.ProxyFactory;
 
 public class ProxyBuilder {
     public static <T> T build(T obj, MethodInterceptor interceptor) {
-        T result = (T) Enhancer.create(obj.getClass(), interceptor);
-        return result;
+        ProxyFactory pf = new ProxyFactory(obj);
+        pf.addAdvice(interceptor);
+        return (T) pf.getProxy();
     }
 }

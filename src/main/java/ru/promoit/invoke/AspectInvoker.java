@@ -1,17 +1,13 @@
 package ru.promoit.invoke;
 
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.cglib.proxy.MethodInterceptor;
-import org.springframework.cglib.proxy.MethodProxy;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 import ru.promoit.aspect.AfterAspect;
 import ru.promoit.aspect.BeforeAspect;
 import ru.promoit.aspect.OverrideAspect;
 
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Objects;
-import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 public class AspectInvoker<T> implements MethodInterceptor {
@@ -35,7 +31,11 @@ public class AspectInvoker<T> implements MethodInterceptor {
     }
 
     @Override
-    public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
+    public Object invoke(MethodInvocation invocation) throws Throwable {
+        T obj = (T)invocation.getThis();
+        Object[] args = invocation.getArguments();
+        Method method = invocation.getMethod();
+
         if (!method.getName().equals(methodName)) {
             return method.invoke(obj, args);
         }
