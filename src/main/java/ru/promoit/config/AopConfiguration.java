@@ -36,8 +36,8 @@ public class AopConfiguration {
         };
 
         List<AspectInvoker> invokers = Arrays.asList(
-                new AspectInvoker<>(beanFactory, TestComponent1.class, "testMethod1", beforeAspect1, null, null),
-                new AspectInvoker<>(beanFactory, TestComponent2.class, "testMethod3", beforeAspect2, null, null)
+                new AspectInvoker<>(TestComponent1.class, "testMethod1", beforeAspect1, null, null),
+                new AspectInvoker<>(TestComponent2.class, "testMethod3", beforeAspect2, null, null)
         );
 
         return new AspectInvokeBeanPostProcessor(invokers);

@@ -15,6 +15,6 @@ public class TestSchedule {
     @Scheduled(fixedDelay = 1000, initialDelay = 1000)
     public void test() {
         component1.testMethod1("123");
-        component2.testMethod2("456");
+        component2.testMethod3("456");
     }
 }

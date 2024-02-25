@@ -3,7 +3,7 @@ package ru.promoit.component;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TestComponent2 extends TestComponent1 {
+public class TestComponent2 {
     public String testMethod3(String s) {
         return s + "test3";
     }

@@ -1,10 +1,11 @@
 package ru.promoit.invoke;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
+import org.springframework.cglib.proxy.Enhancer;
+import org.springframework.cglib.proxy.MethodInterceptor;
 
 public class ProxyBuilder {
-    public static <T> T build(T obj, InvocationHandler handler) {
-        return (T) Proxy.newProxyInstance(obj.getClass().getClassLoader(), obj.getClass().getInterfaces(), handler);
+    public static <T> T build(T obj, MethodInterceptor interceptor) {
+        T result = (T) Enhancer.create(obj.getClass(), interceptor);
+        return result;
     }
 }
