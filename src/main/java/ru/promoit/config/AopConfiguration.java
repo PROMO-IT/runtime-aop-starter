@@ -1,5 +1,7 @@
 package ru.promoit.config;
 
+import groovy.lang.GroovyClassLoader;
+import groovy.lang.GroovyObject;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
@@ -10,27 +12,26 @@ import ru.promoit.component.TestComponent1;
 import ru.promoit.component.TestComponent2;
 import ru.promoit.invoke.AspectInvoker;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 
 @Configuration
 public class AopConfiguration {
     @Bean
-    public BeanPostProcessor aspectInvokeBpp(BeanFactory beanFactory) {
-        BeforeAspect<TestComponent1> beforeAspect1 = new BeforeAspect<>() {
-            @Override
-            public Object[] beforeAdvice(TestComponent1 obj, Object[] args) throws Throwable {
-                String s = (String) args[0];
-                System.out.println("before1" + s);
-                return args;
-            }
-        };
+    public BeanPostProcessor aspectInvokeBpp(BeanFactory beanFactory) throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+
+        GroovyClassLoader loader = new GroovyClassLoader();
+        //Class aClass = loader.parseClass(new File("src/main/java/ru/promoit/component/BeforeAspect1.groovy"));
+        Class<?> aClass = loader.loadClass("ru.promoit.component.BeforeAspect1");
+        BeforeAspect<TestComponent1> beforeAspect1 = (BeforeAspect<TestComponent1>) aClass.getDeclaredConstructor(null).newInstance();
 
         BeforeAspect<TestComponent2> beforeAspect2 = new BeforeAspect<>() {
             @Override
             public Object[] beforeAdvice(TestComponent2 obj, Object[] args) throws Throwable {
-                String s = (String) args[0];
-                System.out.println("before2" + s);
+                args[0] = (String) args[0] + "bbb";
                 return args;
             }
         };
