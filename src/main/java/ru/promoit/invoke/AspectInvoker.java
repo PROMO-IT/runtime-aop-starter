@@ -3,6 +3,7 @@ package ru.promoit.invoke;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import ru.promoit.aspect.AfterAspect;
+import ru.promoit.aspect.Aspect;
 import ru.promoit.aspect.BeforeAspect;
 import ru.promoit.aspect.OverrideAspect;
 
@@ -10,29 +11,25 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.logging.Logger;
 
-public class AspectInvoker<T> implements MethodInterceptor {
+public class AspectInvoker implements MethodInterceptor {
     private final Logger log = Logger.getLogger(this.getClass().getName());
-    private final Class<T> clazz;
+    private final Class<?> clazz;
     private final String methodName;
-    private final BeforeAspect beforeAspect;
-    private final AfterAspect afterAspect;
-    private final OverrideAspect overrideAspect;
+    private final Aspect aspect;
 
-    public AspectInvoker(Class<T> clazz, String methodName, BeforeAspect beforeAspect, AfterAspect afterAspect, OverrideAspect overrideAspect) {
+    public AspectInvoker(Class<?> clazz, String methodName, Aspect aspect) {
         this.clazz = clazz;
         this.methodName = methodName;
-        this.beforeAspect = beforeAspect;
-        this.afterAspect = afterAspect;
-        this.overrideAspect = overrideAspect;
+        this.aspect = aspect;
     }
 
-    public Class<T> getClazz() {
+    public Class<?> getClazz() {
         return clazz;
     }
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
-        T obj = (T)invocation.getThis();
+        Object obj = invocation.getThis();
         Object[] args = invocation.getArguments();
         Method method = invocation.getMethod();
 
@@ -40,14 +37,14 @@ public class AspectInvoker<T> implements MethodInterceptor {
             return method.invoke(obj, args);
         }
 
-        if (Objects.nonNull(overrideAspect)) {
-            return overrideAspect.overrideAdvice((T)obj, args);
+        if (aspect instanceof OverrideAspect overrideAspect) {
+            return overrideAspect.overrideAdvice(obj, args);
         }
 
         Object[] targs = null;
-        if (Objects.nonNull(beforeAspect)) {
+        if (aspect instanceof BeforeAspect beforeAspect) {
             try {
-                targs = beforeAspect.beforeAdvice((T)obj, args);
+                targs = beforeAspect.beforeAdvice(obj, args);
             } catch (Throwable th) {
                 log.warning("beforeAspect for " + obj.getClass().getName() + " threw: " + th.getMessage());
             }
@@ -55,9 +52,9 @@ public class AspectInvoker<T> implements MethodInterceptor {
 
         Object result = method.invoke(obj, Objects.nonNull(targs) ? targs : args);
 
-        if (Objects.nonNull(afterAspect)) {
+        if (aspect instanceof AfterAspect afterAspect) {
             try {
-                return afterAspect.afterAdvice((T)obj, args, result);
+                return afterAspect.afterAdvice(obj, args, result);
             } catch (Throwable th) {
                 log.warning("afterAspect for " + obj.getClass().getName() + " threw: " + th.getMessage());
             }

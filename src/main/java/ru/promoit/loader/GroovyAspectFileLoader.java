@@ -27,7 +27,7 @@ public class GroovyAspectFileLoader<T extends Aspect> implements AspectSourceLoa
     }
 
     @Override
-    public boolean match(String pattern) {
-        return "file".equals(pattern);
+    public boolean match(String driver) {
+        return "file".equals(driver);
     }
 }

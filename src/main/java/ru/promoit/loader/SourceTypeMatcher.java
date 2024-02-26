@@ -1,5 +1,5 @@
 package ru.promoit.loader;
 
 public interface SourceTypeMatcher {
-    boolean match(String pattern);
+    boolean match(String driver);
 }
