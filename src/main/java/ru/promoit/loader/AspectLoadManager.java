@@ -3,14 +3,10 @@ package ru.promoit.loader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ru.promoit.aspect.Aspect;
-import ru.promoit.aspect.BeforeAspect;
 import ru.promoit.invoke.AspectInvoker;
 import ru.promoit.loader.provider.GroovyAspectSourceProvider;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Component

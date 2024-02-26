@@ -8,7 +8,6 @@ import ru.promoit.invoke.AspectInvoker;
 import ru.promoit.invoke.ProxyBuilder;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class AspectInvokeBeanPostProcessor implements BeanPostProcessor {

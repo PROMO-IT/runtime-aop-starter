@@ -1,9 +1,7 @@
 package ru.promoit.loader;
 
 import groovy.lang.GroovyClassLoader;
-import org.springframework.stereotype.Component;
 import ru.promoit.aspect.Aspect;
-import ru.promoit.aspect.BeforeAspect;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
