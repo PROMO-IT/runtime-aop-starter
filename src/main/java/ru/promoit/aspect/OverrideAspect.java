@@ -1,7 +1,7 @@
 package ru.promoit.aspect;
 
-public interface OverrideAspect<T> {
-    default Object overrideAdvice(T obj, Object[] args) throws Throwable {
+public interface OverrideAspect extends Aspect {
+    default Object overrideAdvice(Object obj, Object[] args) throws Throwable {
         return null;
     }
 }

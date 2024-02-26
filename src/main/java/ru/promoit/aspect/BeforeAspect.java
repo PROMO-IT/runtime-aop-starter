@@ -1,7 +1,7 @@
 package ru.promoit.aspect;
 
-public interface BeforeAspect<T> {
-    default Object[] beforeAdvice(T obj, Object[] args) throws Throwable {
+public interface BeforeAspect extends Aspect {
+    default Object[] beforeAdvice(Object obj, Object[] args) throws Throwable {
         return args;
     }
 }

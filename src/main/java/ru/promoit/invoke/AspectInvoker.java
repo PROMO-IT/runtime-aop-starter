@@ -14,11 +14,11 @@ public class AspectInvoker<T> implements MethodInterceptor {
     private final Logger log = Logger.getLogger(this.getClass().getName());
     private final Class<T> clazz;
     private final String methodName;
-    private final BeforeAspect<T> beforeAspect;
-    private final AfterAspect<T> afterAspect;
-    private final OverrideAspect<T> overrideAspect;
+    private final BeforeAspect beforeAspect;
+    private final AfterAspect afterAspect;
+    private final OverrideAspect overrideAspect;
 
-    public AspectInvoker(Class<T> clazz, String methodName, BeforeAspect<T> beforeAspect, AfterAspect<T> afterAspect, OverrideAspect<T> overrideAspect) {
+    public AspectInvoker(Class<T> clazz, String methodName, BeforeAspect beforeAspect, AfterAspect afterAspect, OverrideAspect overrideAspect) {
         this.clazz = clazz;
         this.methodName = methodName;
         this.beforeAspect = beforeAspect;

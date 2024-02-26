@@ -1,7 +1,7 @@
 package ru.promoit.aspect;
 
-public interface AfterAspect<T> {
-    default Object afterAdvice(T obj, Object[] args, Object result) throws Throwable {
+public interface AfterAspect extends Aspect {
+    default Object afterAdvice(Object obj, Object[] args, Object result) throws Throwable {
         return result;
     }
 }
