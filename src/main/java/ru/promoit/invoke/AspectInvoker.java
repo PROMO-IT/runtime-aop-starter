@@ -9,10 +9,10 @@ import ru.promoit.aspect.OverrideAspect;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 public class AspectInvoker implements MethodInterceptor {
-    private final Logger log = Logger.getLogger(this.getClass().getName());
     private final Class<?> clazz;
     private final String methodName;
     private final Aspect aspect;
@@ -41,25 +41,18 @@ public class AspectInvoker implements MethodInterceptor {
             return overrideAspect.overrideAdvice(obj, args);
         }
 
-        Object[] targs = null;
-        if (aspect instanceof BeforeAspect beforeAspect) {
-            try {
-                targs = beforeAspect.beforeAdvice(obj, args);
-            } catch (Throwable th) {
-                log.warning("beforeAspect for " + obj.getClass().getName() + " threw: " + th.getMessage());
-            }
-        }
+        Object[] targs = Optional.ofNullable(aspect)
+                .filter(a -> a instanceof BeforeAspect)
+                .map(a -> (BeforeAspect) a)
+                .map(a -> a.beforeAdvice(obj, args))
+                .orElse(null);
 
         Object result = method.invoke(obj, Objects.nonNull(targs) ? targs : args);
 
-        if (aspect instanceof AfterAspect afterAspect) {
-            try {
-                return afterAspect.afterAdvice(obj, args, result);
-            } catch (Throwable th) {
-                log.warning("afterAspect for " + obj.getClass().getName() + " threw: " + th.getMessage());
-            }
-        }
-
-        return result;
+        return Optional.ofNullable(aspect)
+                .filter(a -> a instanceof AfterAspect)
+                .map(a -> (AfterAspect) a)
+                .map(a -> a.afterAdvice(obj, args, result))
+                .orElse(result);
     }
 }
