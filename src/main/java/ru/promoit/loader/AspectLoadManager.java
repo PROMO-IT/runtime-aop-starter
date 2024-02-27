@@ -24,28 +24,38 @@ public class AspectLoadManager {
         String[] keyvals = aspectMap.split(";");
         List<AspectInvoker> invokers = new ArrayList<>();
         for (String keyval : keyvals) {
-            String[] kv = keyval.split("=");
-            String key = kv[0];
-            String val = kv[1];
-            String[] classMethod = key.split("#");
-            String clazz = classMethod[0];
-            String method = classMethod[1];
-            String[] driverProp = val.split(":");
-            String driver = driverProp[0];
-            String prop = driverProp[1];
-            Class<?> aClass = Class.forName(clazz);
+            PropertyMapDto propertyMapDto = parsePropertyRow(keyval);
 
-            Aspect aspect = switch (driver) {
-                case "class" -> new GroovyAspectClassLoader(prop).load();
+            Aspect aspect = switch (propertyMapDto.driver) {
+                case "class" -> new GroovyAspectClassLoader(propertyMapDto.property).load();
                 default -> sourceProviders.stream()
-                        .filter(provider -> provider.match(driver))
+                        .filter(provider -> provider.match(propertyMapDto.driver))
                         .findFirst()
-                        .map(provider -> new GroovyAspectProviderLoader(provider, prop)).orElseThrow().load();
+                        .map(provider -> new GroovyAspectProviderLoader(provider, propertyMapDto.property))
+                        .orElseThrow(() -> new RuntimeException("no provider found for driver = " + propertyMapDto.driver))
+                        .load();
             };
 
-            invokers.add(new AspectInvoker(aClass, method, aspect));
+            invokers.add(new AspectInvoker(propertyMapDto.clazz, propertyMapDto.method, aspect));
         }
 
         return invokers;
     }
+
+    private PropertyMapDto parsePropertyRow(String row) throws ClassNotFoundException {
+        String[] kv = row.split("=");
+        String key = kv[0];
+        String val = kv[1];
+        String[] classMethod = key.split("#");
+        String clazz = classMethod[0];
+        String method = classMethod[1];
+        String[] driverProp = val.split(":");
+        String driver = driverProp[0];
+        String prop = driverProp[1];
+        Class<?> aClass = Class.forName(clazz);
+
+        return new PropertyMapDto(method, driver, prop, aClass);
+    }
+
+    private record PropertyMapDto(String method, String driver, String property, Class<?> clazz) {}
 }

@@ -24,7 +24,6 @@ public class AspectInvokeBeanPostProcessor implements BeanPostProcessor {
         if (aspectInvokers.isEmpty()) {
             return BeanPostProcessor.super.postProcessAfterInitialization(bean, beanName);
         }
-        Object obj =  ProxyBuilder.build(bean, aspectInvokers);
-        return obj;
+        return ProxyBuilder.build(bean, aspectInvokers);
     }
 }
