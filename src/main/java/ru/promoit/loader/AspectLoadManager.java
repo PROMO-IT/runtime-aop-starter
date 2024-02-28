@@ -5,8 +5,11 @@ import ru.promoit.config.ConfigProperties;
 import ru.promoit.invoke.AspectInvoker;
 import ru.promoit.loader.provider.GroovyAspectSourceProvider;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class AspectLoadManager {
     private final ConfigProperties configProperties;
@@ -23,14 +26,26 @@ public class AspectLoadManager {
         for (String keyval : keyvals) {
             PropertyMapDto propertyMapDto = parsePropertyRow(keyval);
 
-            Aspect aspect = switch (propertyMapDto.driver) {
-                case "class" -> new GroovyAspectClassLoader(propertyMapDto.property).load();
-                default -> sourceProviders.stream()
-                        .filter(provider -> provider.match(propertyMapDto.driver))
-                        .findFirst()
-                        .map(provider -> new GroovyAspectProviderLoader(provider, propertyMapDto.property))
-                        .orElseThrow(() -> new RuntimeException("no provider found for driver = " + propertyMapDto.driver))
-                        .load();
+            Supplier<Aspect> aspect = switch (propertyMapDto.driver) {
+                case "class" -> () -> {
+                    try {
+                        return new GroovyAspectClassLoader(propertyMapDto.property).load();
+                    } catch (Throwable e) {
+                        throw new RuntimeException(e);
+                    }
+                };
+                default -> () -> {
+                    try {
+                        return sourceProviders.stream()
+                                .filter(provider -> provider.match(propertyMapDto.driver))
+                                .findFirst()
+                                .map(provider -> new GroovyAspectProviderLoader(provider, propertyMapDto.property))
+                                .orElseThrow(() -> new RuntimeException("no provider found for driver = " + propertyMapDto.driver))
+                                .load();
+                    } catch (Throwable e) {
+                        throw new RuntimeException(e);
+                    }
+                };
             };
 
             invokers.add(new AspectInvoker(propertyMapDto.clazz, propertyMapDto.method, aspect));

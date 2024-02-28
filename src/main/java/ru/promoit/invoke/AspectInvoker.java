@@ -9,13 +9,14 @@ import ru.promoit.aspect.OverrideAspect;
 
 import java.lang.reflect.Method;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class AspectInvoker implements MethodInterceptor {
     private final Class<?> clazz;
     private final String methodName;
-    private final Aspect aspect;
+    private final Supplier<Aspect> aspect;
 
-    public AspectInvoker(Class<?> clazz, String methodName, Aspect aspect) {
+    public AspectInvoker(Class<?> clazz, String methodName, Supplier<Aspect> aspect) {
         this.clazz = clazz;
         this.methodName = methodName;
         this.aspect = aspect;
@@ -30,6 +31,7 @@ public class AspectInvoker implements MethodInterceptor {
         Object obj = invocation.getThis();
         Object[] args = invocation.getArguments();
         Method method = invocation.getMethod();
+        Aspect aspect = this.aspect.get();
 
         if (!method.getName().equals(methodName)) {
             return method.invoke(obj, args);
