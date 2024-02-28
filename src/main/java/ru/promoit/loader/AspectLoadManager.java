@@ -1,27 +1,24 @@
 package ru.promoit.loader;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import ru.promoit.aspect.Aspect;
+import ru.promoit.config.ConfigProperties;
 import ru.promoit.invoke.AspectInvoker;
 import ru.promoit.loader.provider.GroovyAspectSourceProvider;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
 public class AspectLoadManager {
-    @Value("${runtime-aop.config.aspect-map}")
-    private String aspectMap;
-
+    private final ConfigProperties configProperties;
     private final List<GroovyAspectSourceProvider> sourceProviders;
 
-    public AspectLoadManager(List<GroovyAspectSourceProvider> sourceProviders) {
+    public AspectLoadManager(ConfigProperties configProperties, List<GroovyAspectSourceProvider> sourceProviders) {
+        this.configProperties = configProperties;
         this.sourceProviders = sourceProviders;
     }
 
     public List<AspectInvoker> getInvokers() throws Throwable {
-        String[] keyvals = aspectMap.split(";");
+        String[] keyvals = configProperties.aspectMap().split(";");
         List<AspectInvoker> invokers = new ArrayList<>();
         for (String keyval : keyvals) {
             PropertyMapDto propertyMapDto = parsePropertyRow(keyval);

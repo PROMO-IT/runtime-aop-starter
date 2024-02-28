@@ -1,10 +1,7 @@
 package ru.promoit.loader.provider;
 
-import org.springframework.stereotype.Component;
-
 import java.io.FileInputStream;
 
-@Component
 public class GroovyAspectFileProvider implements GroovyAspectSourceProvider {
     @Override
     public boolean match(String driver) {

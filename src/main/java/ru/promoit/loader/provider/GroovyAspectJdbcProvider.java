@@ -1,15 +1,10 @@
 package ru.promoit.loader.provider;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.stereotype.Component;
-
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-@Component
-@ConditionalOnBean(DataSource.class)
 public class GroovyAspectJdbcProvider implements GroovyAspectSourceProvider {
     private final DataSource dataSource;
 
