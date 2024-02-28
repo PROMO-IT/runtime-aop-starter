@@ -8,9 +8,7 @@ import ru.promoit.aspect.BeforeAspect;
 import ru.promoit.aspect.OverrideAspect;
 
 import java.lang.reflect.Method;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.logging.Logger;
 
 public class AspectInvoker implements MethodInterceptor {
     private final Class<?> clazz;
@@ -45,9 +43,9 @@ public class AspectInvoker implements MethodInterceptor {
                 .filter(a -> a instanceof BeforeAspect)
                 .map(a -> (BeforeAspect) a)
                 .map(a -> a.beforeAdvice(obj, args))
-                .orElse(null);
+                .orElse(args);
 
-        Object result = method.invoke(obj, Objects.nonNull(targs) ? targs : args);
+        Object result = method.invoke(obj, targs);
 
         return Optional.ofNullable(aspect)
                 .filter(a -> a instanceof AfterAspect)
