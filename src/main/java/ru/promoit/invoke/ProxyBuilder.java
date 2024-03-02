@@ -1,6 +1,5 @@
 package ru.promoit.invoke;
 
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.framework.ProxyFactory;
 
