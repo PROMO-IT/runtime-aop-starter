@@ -19,7 +19,7 @@ import java.util.List;
 @ConditionalOnBean(ConfigProperties.class)
 public class AopConfiguration {
     @Bean
-    public BeanPostProcessor aspectInvokeBpp(AspectLoadManager manager) throws Throwable {
+    public BeanPostProcessor aspectInvokeBpp(AspectLoadManager manager) {
         return new AspectInvokeBeanPostProcessor(manager.getInvokers());
     }
 

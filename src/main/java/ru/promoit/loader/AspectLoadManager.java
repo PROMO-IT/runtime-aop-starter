@@ -21,7 +21,7 @@ public class AspectLoadManager {
         this.sourceProviders = sourceProviders;
     }
 
-    public List<AspectInvoker> getInvokers() throws Throwable {
+    public List<AspectInvoker> getInvokers() {
         String[] keyvals = configProperties.aspectMap().split(";");
         List<AspectInvoker> invokers = new ArrayList<>();
         for (String keyval : keyvals) {
@@ -51,7 +51,7 @@ public class AspectLoadManager {
                     throw new RuntimeException(e);
                 }
             };
-                break;
+            break;
             default:
                 var aspectSourceProvider = sourceProviders.stream()
                         .filter(provider -> provider.match(propertyMapDto.driver))
@@ -69,7 +69,9 @@ public class AspectLoadManager {
         return aspect;
     }
 
-    private PropertyMapDto parsePropertyRow(String row) throws ClassNotFoundException {
+    private record PropertyMapDto(String method, String driver, String property, Class<?> clazz, SupplyType supplyType) {}
+
+    private PropertyMapDto parsePropertyRow(String row) {
         try {
             String[] kv = row.split("=");
             String key = kv[0];
@@ -90,6 +92,4 @@ public class AspectLoadManager {
             throw new RuntimeException("failed parsing property value", e);
         }
     }
-
-    private record PropertyMapDto(String method, String driver, String property, Class<?> clazz, SupplyType supplyType) {}
 }
