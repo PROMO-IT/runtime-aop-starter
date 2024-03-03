@@ -1,5 +1,6 @@
 package ru.promoit.loader;
 
+import org.springframework.beans.factory.BeanFactory;
 import ru.promoit.aspect.Aspect;
 import ru.promoit.config.ConfigProperties;
 import ru.promoit.invoke.AspectInvoker;
@@ -16,9 +17,12 @@ public class AspectLoadManager {
     private final ConfigProperties configProperties;
     private final List<GroovyAspectSourceProvider> sourceProviders;
 
-    public AspectLoadManager(ConfigProperties configProperties, List<GroovyAspectSourceProvider> sourceProviders) {
+    private final BeanFactory beanFactory;
+
+    public AspectLoadManager(ConfigProperties configProperties, List<GroovyAspectSourceProvider> sourceProviders, BeanFactory beanFactory) {
         this.configProperties = configProperties;
         this.sourceProviders = sourceProviders;
+        this.beanFactory = beanFactory;
     }
 
     public List<AspectInvoker> getInvokers() {
@@ -34,7 +38,7 @@ public class AspectLoadManager {
                 case INSTANT -> new InstantAspectSupplier(aspect);
             };
 
-            invokers.add(new AspectInvoker(propertyMapDto.clazz, propertyMapDto.method, aspectWrapper));
+            invokers.add(new AspectInvoker(propertyMapDto.clazz, propertyMapDto.method, aspectWrapper, beanFactory));
         }
 
         return invokers;

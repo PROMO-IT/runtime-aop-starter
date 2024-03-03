@@ -2,6 +2,7 @@ package ru.promoit.invoke;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.beans.factory.BeanFactory;
 import ru.promoit.aspect.AfterAspect;
 import ru.promoit.aspect.Aspect;
 import ru.promoit.aspect.BeforeAspect;
@@ -16,10 +17,13 @@ public class AspectInvoker implements MethodInterceptor {
     private final String methodName;
     private final Supplier<Aspect> aspect;
 
-    public AspectInvoker(Class<?> clazz, String methodName, Supplier<Aspect> aspect) {
+    private final BeanFactory beanFactory;
+
+    public AspectInvoker(Class<?> clazz, String methodName, Supplier<Aspect> aspect, BeanFactory beanFactory) {
         this.clazz = clazz;
         this.methodName = methodName;
         this.aspect = aspect;
+        this.beanFactory = beanFactory;
     }
 
     public Class<?> getClazz() {
@@ -38,13 +42,13 @@ public class AspectInvoker implements MethodInterceptor {
         }
 
         if (aspect instanceof OverrideAspect overrideAspect) {
-            return overrideAspect.overrideAdvice(obj, args);
+            return overrideAspect.overrideAdvice(obj, args, beanFactory);
         }
 
         Object[] targs = Optional.ofNullable(aspect)
                 .filter(a -> a instanceof BeforeAspect)
                 .map(a -> (BeforeAspect) a)
-                .map(a -> a.beforeAdvice(obj, args))
+                .map(a -> a.beforeAdvice(obj, args, beanFactory))
                 .orElse(args);
 
         Object result = method.invoke(obj, targs);
@@ -52,7 +56,7 @@ public class AspectInvoker implements MethodInterceptor {
         return Optional.ofNullable(aspect)
                 .filter(a -> a instanceof AfterAspect)
                 .map(a -> (AfterAspect) a)
-                .map(a -> a.afterAdvice(obj, args, result))
+                .map(a -> a.afterAdvice(obj, args, result, beanFactory))
                 .orElse(result);
     }
 }

@@ -1,5 +1,6 @@
 package ru.promoit.config;
 
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -35,7 +36,7 @@ public class AopConfiguration {
     }
 
     @Bean
-    public AspectLoadManager aspectLoadManager(ConfigProperties configProperties, List<GroovyAspectSourceProvider> sourceProviders) {
-        return new AspectLoadManager(configProperties, sourceProviders);
+    public AspectLoadManager aspectLoadManager(ConfigProperties configProperties, List<GroovyAspectSourceProvider> sourceProviders, BeanFactory beanFactory) {
+        return new AspectLoadManager(configProperties, sourceProviders, beanFactory);
     }
 }
