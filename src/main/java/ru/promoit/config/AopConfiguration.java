@@ -20,8 +20,8 @@ import java.util.List;
 @ConditionalOnBean(ConfigProperties.class)
 public class AopConfiguration {
     @Bean
-    public BeanPostProcessor aspectInvokeBpp(AspectLoadManager manager) {
-        return new AspectInvokeBeanPostProcessor(manager.getInvokers());
+    public BeanPostProcessor aspectInvokeBpp(ConfigProperties configProperties, List<GroovyAspectSourceProvider> sourceProviders, BeanFactory beanFactory) {
+        return new AspectInvokeBeanPostProcessor(new AspectLoadManager(configProperties, sourceProviders, beanFactory).getInvokers());
     }
 
     @Bean
@@ -33,10 +33,5 @@ public class AopConfiguration {
     @ConditionalOnBean({DataSource.class})
     public GroovyAspectSourceProvider groovyAspectJdbcProvider(DataSource dataSource) {
         return new GroovyAspectJdbcProvider(dataSource);
-    }
-
-    @Bean
-    public AspectLoadManager aspectLoadManager(ConfigProperties configProperties, List<GroovyAspectSourceProvider> sourceProviders, BeanFactory beanFactory) {
-        return new AspectLoadManager(configProperties, sourceProviders, beanFactory);
     }
 }
