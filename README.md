@@ -42,9 +42,9 @@ parameter _loadingMode_:
 
 parameter _sourceType_:
 
--_file_ - loads script from file (path: _{sourceValue}_)
--_jdbc_ - loads script from SQL Database (sql: _{sourceValue}_)
--_class_ - loads script from classpath
+- _file_ - loads script from file (path: _{sourceValue}_)
+- _jdbc_ - loads script from SQL Database (sql: _{sourceValue}_)
+- _class_ - loads script from classpath
 
 Example:
 ```
