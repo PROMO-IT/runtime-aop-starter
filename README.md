@@ -1,1 +1,177 @@
 # runtime-aop-starter
+
+runtime-aop-starter provides executing any injected code into specified methods of your beans in Spring Boot Application in runtime mode
+
+## Features
+
+- Supports groovy scripts
+- injects code before specified bean method
+- injects code after specified bean method
+- overrides bean method by injected code
+- loads injecting code from several sources (file, jdbc, etc) in runtime
+
+## Installation
+
+Include into dependecies
+
+```java
+<dependency>
+    <groupId>ru.promoit</groupId>
+    <artifactId>runtime-aop-starter</artifactId>
+</dependency>
+```
+
+Specify property (for example)
+```
+runtime-aop.config.aspect-map=org.example.component.TestComponent1#testMethod1=once-file:src/main/resources/BeforeAspect1.groovy;\
+  org.example.component.TestComponent2#testMethod3=ever-file:src/main/resources/BeforeAspect2.groovy;\
+  org.example.component.TestController#test=instant-file:src/main/resources/OverrideAspect.groovy
+```
+
+## Details
+### Configuring
+Property pattern
+```java
+runtime-aop.config.aspect-map={class}#{method}={loadingMode}-{sourceType}:{sourceValue}
+```
+parameter _loadingMode_:
+
+- _instant_ - loads script on starting of apllication
+- _once_ - loads script once on target method call
+- _ever_ - loads scripts every time when target method calls
+
+parameter _sourceType_:
+
+-_file_ - loads script from file (path: _{sourceValue}_)
+-_jdbc_ - loads script from SQL Database (sql: _{sourceValue}_)
+-_class_ - loads script from classpath
+
+Example:
+```
+runtime-aop.config.aspect-map=org.example.component.TestComponent1#testMethod1=once-file:src/main/resources/BeforeAspect1.groovy
+```
+_org.example.component.TestComponent1_ - target class
+_testMethod1_ - target method
+_once_ - loading mode
+_file_ - source type
+_src/main/resources/BeforeAspect1.groovy_ - source value
+
+### Inject Before method
+For example, we need to inject code before bean method _testMethod1_
+```java
+@Component
+public class TestComponent1 {
+    public String testMethod1(String param) {
+        return "test1: " + s;
+    }
+}
+```
+
+Specified groovy code
+```groovy
+import org.springframework.beans.factory.BeanFactory
+import ru.promoit.aspect.BeforeAspect
+
+class BeforeAspect1 implements BeforeAspect {
+    Object[] beforeAdvice(Object obj, Object[] args, Object beanFactory) throws Throwable {
+        String s = args[0] as String
+        Object[] objs = new Objects[1]
+        objs[0] = s.toUpperCase()
+        return objs
+    }
+}
+```
+_beforeAdvice_ returns Object[] parameters for target method (TestComponent1#testMethod1)
+Parameters:
+ - _obj_ - target bean
+ - _args_ - bean method's arguments
+ - _beanFactory_ - Spring BeanFactory (for communicating with other bean in Spring Context)
+(In case above inected groovy script changes _param_ argument of _testMethod1_ to UpperCase String)
+
+Native method call example:
+```java
+testComponent1.testMethod1("hello") //returns "test1: hello"
+```
+Injected method with BeforeAspect1 call example:
+```java
+testComponent1.testMethod1("hello") //returns "test1: HELLO"
+```
+
+### Inject After method
+For example, we need to inject code after bean method _testMethod1_
+```java
+@Component
+public class TestComponent1 {
+    public String testMethod1(String param) {
+        return "test1: " + s;
+    }
+}
+```
+Specified groovy code
+```groovy
+import org.springframework.beans.factory.BeanFactory
+import ru.promoit.aspect.AfterAdvice
+
+class AfterAspect1 implements AfterAdvice {
+    Object afterAdvice(Object obj, Object[] args, Object result, Object beanFactory) throws RuntimeException {
+        return result.toUpperCase();
+    }
+}
+```
+_afterAdvice_ returns new result of target method (TestComponent1#testMethod1)
+Parameters:
+ - _obj_ - target bean
+ - _args_ - bean method's arguments
+ - _result_ - original result of target bean method
+ - _beanFactory_ - Spring BeanFactory (for communicating with other bean in Spring Context)
+(In case above inected groovy script changes _result_ of _testMethod1_ to UpperCase String)
+
+Native method call example:
+```java
+testComponent1.testMethod1("hello") //returns "test1: hello"
+```
+Injected method with AfterAspect1 call example:
+```java
+testComponent1.testMethod1("hello") //returns "TEST1: HELLO"
+```
+
+### Inject Overrided method
+For example, we need to inject code instead of bean method _testMethod1_
+```java
+@Component
+public class TestComponent1 {
+    public String testMethod1(String param) {
+        return "test1: " + s;
+    }
+}
+```
+Specified groovy code
+```groovy
+import org.springframework.beans.factory.BeanFactory
+import ru.promoit.aspect.OverrideAspect
+
+class OverrideAspect1 implements OverrideAspect {
+    Object overrideAdvice(Object obj, Object[] args, Object beanFactory) throws RuntimeException {
+        return "123"
+    }
+}
+```
+_overrideAdvice_ returns new result of target method (TestComponent1#testMethod1)
+Parameters:
+ - _obj_ - target bean
+ - _args_ - bean method's arguments
+ - _beanFactory_ - Spring BeanFactory (for communicating with other bean in Spring Context)
+(In case above inected groovy script changes _result_ of _testMethod1_ to "123")
+
+Native method call example:
+```java
+testComponent1.testMethod1("hello") //returns "test1: hello"
+```
+Injected method with OverrideAspect1 call example:
+```java
+testComponent1.testMethod1("hello") //returns "123"
+```
+
+## Author
+[PromoIT]: https://promo-z.ru/
+Thanks to Richard Khims
