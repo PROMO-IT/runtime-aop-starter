@@ -173,5 +173,5 @@ testComponent1.testMethod1("hello") //returns "123"
 ```
 
 ## Author
-[PromoIT]: https://promo-z.ru/
+https://promo-z.ru/
 Thanks to Richard Khims
