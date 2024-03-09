@@ -24,7 +24,7 @@ Include into dependecies
 Specify property (for example)
 ```
 runtime-aop.config.aspect-map=org.example.component.TestComponent1#testMethod1=once-file:src/main/resources/BeforeAspect1.groovy;\
-  org.example.component.TestComponent2#testMethod3=ever-file:src/main/resources/BeforeAspect2.groovy;\
+  org.example.component.TestComponent2#testMethod3=ever-jdbc:select code from table_groovy limit 1;\
   org.example.component.TestController#test=instant-file:src/main/resources/OverrideAspect.groovy
 ```
 
