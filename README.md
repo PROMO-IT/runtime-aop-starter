@@ -56,6 +56,32 @@ _once_ - loading mode
 _file_ - source type
 _src/main/resources/BeforeAspect1.groovy_ - source value
 
+### Providing custom code source types
+You can add cusom source types by defining bean. For example:
+```java
+@Component
+public class GroovyAspectFileProvider implements GroovyAspectSourceProvider {
+    @Override
+    public boolean match(String driver) {
+        return "http".equals(driver);
+    }
+
+    @Override
+    public String provide(String property) throws Throwable {
+        GetMethod get = new GetMethod("http://" + property);
+        InputStream in = get.getResponseBodyAsStream();
+        String code = new String(in.readAllBytes());
+        get.releaseConnection();
+        return code;
+    }
+}
+```
+```
+runtime-aop.config.aspect-map=org.example.component.TestComponent1#testMethod1=once-http:someurl.com/code.groovy
+```
+New _sourceType_ (http) is provided in your application
+
+
 ### Inject Before method
 For example, we need to inject code before bean method _testMethod1_
 ```java
