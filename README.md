@@ -174,4 +174,3 @@ testComponent1.testMethod1("hello") //returns "123"
 
 ## Author
 https://promo-z.ru/
-Thanks to Richard Khims
