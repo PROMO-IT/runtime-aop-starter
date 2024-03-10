@@ -12,8 +12,11 @@ import ru.promoit.supplier.SupplyType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AspectLoadManager {
+    private static Pattern PATTERN = Pattern.compile("(?<class>.*?)\\#(?<method>.*?)\\=(?<loadingMode>.*?)\\-(?<sourceType>.*?)\\:(?<sourceValue>.*)");
     private final ConfigProperties configProperties;
     private final List<GroovyAspectSourceProvider> sourceProviders;
 
@@ -77,17 +80,13 @@ public class AspectLoadManager {
 
     private PropertyMapDto parsePropertyRow(String row) {
         try {
-            String[] kv = row.split("=");
-            String key = kv[0];
-            String val = kv[1];
-            String[] classMethod = key.split("#");
-            String clazz = classMethod[0];
-            String method = classMethod[1];
-            String[] driverProp = val.split(":");
-            String[] driverData = driverProp[0].split("-");
-            String supplyType = driverData[0];
-            String driver = driverData[1];
-            String prop = driverProp[1];
+            Matcher m = PATTERN.matcher(row);
+            m.find();
+            String clazz = m.group("class");
+            String method = m.group("method");
+            String supplyType = m.group("loadingMode");
+            String driver = m.group("sourceType");
+            String prop = m.group("sourceValue");
             Class<?> aClass = Class.forName(clazz);
             SupplyType sType = SupplyType.valueOf(supplyType.toUpperCase());
 
