@@ -20,7 +20,7 @@ public class AspectInvokeBeanPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        List<MethodInterceptor> aspectInvokers = invokers.stream().filter(invoker -> bean.getClass().equals(invoker.getClazz())).collect(Collectors.toList());
+        List<MethodInterceptor> aspectInvokers = invokers.stream().filter(invoker -> bean.getClass().getName().equals(invoker.getClazz())).collect(Collectors.toList());
         if (aspectInvokers.isEmpty()) {
             return BeanPostProcessor.super.postProcessAfterInitialization(bean, beanName);
         }

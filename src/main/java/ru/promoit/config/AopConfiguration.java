@@ -16,14 +16,7 @@ import javax.sql.DataSource;
 import java.util.List;
 
 @Configuration
-@AutoConfigureAfter(ConfigProperties.class)
-@ConditionalOnBean(ConfigProperties.class)
 public class AopConfiguration {
-    @Bean
-    public BeanPostProcessor aspectInvokeBpp(ConfigProperties configProperties, List<GroovyAspectSourceProvider> sourceProviders, BeanFactory beanFactory) {
-        return new AspectInvokeBeanPostProcessor(new AspectLoadManager(configProperties, sourceProviders, beanFactory).getInvokers());
-    }
-
     @Bean
     public GroovyAspectSourceProvider groovyAspectFileProvider() {
         return new GroovyAspectFileProvider();
@@ -33,5 +26,10 @@ public class AopConfiguration {
     @ConditionalOnBean({DataSource.class})
     public GroovyAspectSourceProvider groovyAspectJdbcProvider(DataSource dataSource) {
         return new GroovyAspectJdbcProvider(dataSource);
+    }
+
+    @Bean
+    public AspectLoadManager aspectLoadManager(List<GroovyAspectSourceProvider> sourceProviders, BeanFactory beanFactory) {
+        return new AspectLoadManager(sourceProviders, beanFactory);
     }
 }

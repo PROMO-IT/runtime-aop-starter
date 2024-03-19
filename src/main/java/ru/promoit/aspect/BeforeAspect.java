@@ -4,4 +4,9 @@ public interface BeforeAspect extends Aspect {
     default Object[] beforeAdvice(Object obj, Object[] args, Object beanFactory) throws RuntimeException {
         return args;
     }
+
+    @Override
+    default AspectType type() {
+        return AspectType.BEFORE;
+    }
 }

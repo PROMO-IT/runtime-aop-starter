@@ -1,2 +1,5 @@
-ru.promoit.config.ConfigProperties
 ru.promoit.config.AopConfiguration
+ru.promoit.config.AgentProperties
+ru.promoit.config.AgentConfiguration
+ru.promoit.config.AspectProperties
+ru.promoit.config.AspectConfiguration

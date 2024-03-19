@@ -1,8 +1,11 @@
 package ru.promoit.loader;
 
 import org.springframework.beans.factory.BeanFactory;
+import ru.promoit.RuntimeAopAgent;
+import ru.promoit.agent.AbstractInterceptor;
+import ru.promoit.agent.InterceptorFactory;
 import ru.promoit.aspect.Aspect;
-import ru.promoit.config.ConfigProperties;
+import ru.promoit.aspect.AspectType;
 import ru.promoit.invoke.AspectInvoker;
 import ru.promoit.loader.provider.GroovyAspectSourceProvider;
 import ru.promoit.supplier.InstantAspectSupplier;
@@ -10,42 +13,61 @@ import ru.promoit.supplier.OnceAspectSupplier;
 import ru.promoit.supplier.SupplyType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class AspectLoadManager {
-    private static Pattern PATTERN = Pattern.compile("(?<class>.*?)\\#(?<method>.*?)\\=(?<loadingMode>.*?)\\-(?<sourceType>.*?)\\:(?<sourceValue>.*)");
-    private final ConfigProperties configProperties;
+    private static final List<AbstractInterceptor> INTERCEPTORS = new ArrayList<>();
+    private static Pattern PATTERN =
+            Pattern.compile("(?<pointcut>.*?)-(?<class>.*?)\\#(?<method>.*?)\\=(?<loadingMode>.*?)\\-(?<sourceType>.*?)\\:(?<sourceValue>.*)");
     private final List<GroovyAspectSourceProvider> sourceProviders;
-
     private final BeanFactory beanFactory;
 
-    public AspectLoadManager(ConfigProperties configProperties, List<GroovyAspectSourceProvider> sourceProviders, BeanFactory beanFactory) {
-        this.configProperties = configProperties;
+    public AspectLoadManager(List<GroovyAspectSourceProvider> sourceProviders, BeanFactory beanFactory) {
         this.sourceProviders = sourceProviders;
         this.beanFactory = beanFactory;
     }
 
-    public List<AspectInvoker> getInvokers() {
-        String[] keyvals = configProperties.aspectMap().split(";");
-        List<AspectInvoker> invokers = new ArrayList<>();
-        for (String keyval : keyvals) {
-            PropertyMapDto propertyMapDto = parsePropertyRow(keyval);
-
-            Supplier<Aspect> aspect = getNativeSupplier(propertyMapDto);
-            Supplier<Aspect> aspectWrapper = switch (propertyMapDto.supplyType) {
-                case EVER -> aspect;
-                case ONCE -> new OnceAspectSupplier(aspect);
-                case INSTANT -> new InstantAspectSupplier(aspect);
-            };
-
-            invokers.add(new AspectInvoker(propertyMapDto.clazz, propertyMapDto.method, aspectWrapper, beanFactory));
-        }
-
-        return invokers;
+    public List<AspectInvoker> getInvokers(String property) {
+        return aopProperties(property).stream()
+                .map(dto -> new AspectInvoker(dto.clazz, dto.method, getAspect(dto), beanFactory, dto.aspectType))
+                .collect(Collectors.toList());
     }
+
+    public static List<AbstractInterceptor> initInterceptors(String property) {
+        INTERCEPTORS.clear();
+        aopProperties(property).stream()
+                .map(dto -> InterceptorFactory.create(dto.aspectType, dto.clazz, dto.method()))
+                .forEach(INTERCEPTORS::add);
+        return INTERCEPTORS;
+    }
+
+    public void configInterceptors(String property) {
+        List<PropertyMapDto> aopProperties = aopProperties(property);
+        if (INTERCEPTORS.size() == aopProperties.size()) {
+            for (int i = 0; i < aopProperties.size(); i++) {
+                PropertyMapDto dto = aopProperties.get(i);
+                AbstractInterceptor interceptor = INTERCEPTORS.get(i);
+                interceptor.setAspect(getAspect(dto));
+                interceptor.setBeanFactory(beanFactory);
+            }
+        }
+    }
+
+    private Supplier<Aspect> getAspect(PropertyMapDto propertyMapDto) {
+        Supplier<Aspect> aspect = getNativeSupplier(propertyMapDto);
+        Supplier<Aspect> aspectWrapper = switch (propertyMapDto.supplyType) {
+            case EVER -> aspect;
+            case ONCE -> new OnceAspectSupplier(aspect);
+            case INSTANT -> new InstantAspectSupplier(aspect);
+        };
+        return aspectWrapper;
+    }
+
 
     private Supplier<Aspect> getNativeSupplier(PropertyMapDto propertyMapDto) {
         Supplier<Aspect> aspect;
@@ -76,21 +98,28 @@ public class AspectLoadManager {
         return aspect;
     }
 
-    private record PropertyMapDto(String method, String driver, String property, Class<?> clazz, SupplyType supplyType) {}
+    public record PropertyMapDto(String method, String driver, String property, String clazz, SupplyType supplyType, AspectType aspectType) {}
 
-    private PropertyMapDto parsePropertyRow(String row) {
+    public static List<PropertyMapDto> aopProperties(String property) {
+        return Arrays.stream(property.split(";"))
+                .map(AspectLoadManager::parsePropertyRow)
+                .collect(Collectors.toList());
+    }
+
+    private static PropertyMapDto parsePropertyRow(String row) {
         try {
             Matcher m = PATTERN.matcher(row);
             m.find();
+            String pointcut = m.group("pointcut");
             String clazz = m.group("class");
             String method = m.group("method");
             String supplyType = m.group("loadingMode");
             String driver = m.group("sourceType");
             String prop = m.group("sourceValue");
-            Class<?> aClass = Class.forName(clazz);
             SupplyType sType = SupplyType.valueOf(supplyType.toUpperCase());
+            AspectType aspectType = AspectType.valueOf(pointcut.toUpperCase());
 
-            return new PropertyMapDto(method, driver, prop, aClass, sType);
+            return new PropertyMapDto(method, driver, prop, clazz, sType, aspectType);
         } catch (Exception e) {
             throw new RuntimeException("failed parsing property value", e);
         }
