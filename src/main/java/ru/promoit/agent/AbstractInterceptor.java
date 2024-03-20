@@ -5,7 +5,6 @@ import org.springframework.beans.factory.BeanFactory;
 import ru.promoit.aspect.Aspect;
 
 import java.lang.reflect.Method;
-import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
 public abstract class AbstractInterceptor {
