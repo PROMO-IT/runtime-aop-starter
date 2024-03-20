@@ -16,8 +16,8 @@ public class InterceptorFactory {
     }
     public static AbstractInterceptor create(AspectType type, String clazz, String methodName, Supplier<Aspect> aspect, BeanFactory beanFactory) {
         AbstractInterceptor interceptor = create(type, clazz, methodName);
-        interceptor.setAspect(aspect);
-        interceptor.setBeanFactory(beanFactory);
+        interceptor.aspect = aspect;
+        interceptor.beanFactory = beanFactory;
         return interceptor;
     }
 }

@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class AspectLoadManager {
     private static final List<AbstractInterceptor> INTERCEPTORS = new ArrayList<>();
     private static Pattern PATTERN =
-            Pattern.compile("(?<pointcut>.*?)-(?<class>.*?)\\#(?<method>.*?)\\=(?<loadingMode>.*?)\\-(?<sourceType>.*?)\\:(?<sourceValue>.*)");
+            Pattern.compile("(?<advice>.*?)-(?<class>.*?)\\#(?<method>.*?)\\=(?<loadingMode>.*?)\\-(?<sourceType>.*?)\\:(?<sourceValue>.*)");
     private final List<GroovyAspectSourceProvider> sourceProviders;
     private final BeanFactory beanFactory;
 
@@ -52,8 +52,8 @@ public class AspectLoadManager {
             for (int i = 0; i < aopProperties.size(); i++) {
                 PropertyMapDto dto = aopProperties.get(i);
                 AbstractInterceptor interceptor = INTERCEPTORS.get(i);
-                interceptor.setAspect(getAspect(dto));
-                interceptor.setBeanFactory(beanFactory);
+                interceptor.aspect = getAspect(dto);
+                interceptor.beanFactory = beanFactory;
             }
         }
     }
@@ -110,14 +110,14 @@ public class AspectLoadManager {
         try {
             Matcher m = PATTERN.matcher(row);
             m.find();
-            String pointcut = m.group("pointcut");
+            String advice = m.group("advice");
             String clazz = m.group("class");
             String method = m.group("method");
             String supplyType = m.group("loadingMode");
             String driver = m.group("sourceType");
             String prop = m.group("sourceValue");
             SupplyType sType = SupplyType.valueOf(supplyType.toUpperCase());
-            AspectType aspectType = AspectType.valueOf(pointcut.toUpperCase());
+            AspectType aspectType = AspectType.valueOf(advice.toUpperCase());
 
             return new PropertyMapDto(method, driver, prop, clazz, sType, aspectType);
         } catch (Exception e) {

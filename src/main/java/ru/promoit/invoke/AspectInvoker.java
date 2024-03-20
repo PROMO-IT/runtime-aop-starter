@@ -18,7 +18,7 @@ public class AspectInvoker implements MethodInterceptor {
     }
 
     public String getClazz() {
-        return interceptor.getClazz();
+        return interceptor.clazz;
     }
 
     @Override
@@ -27,7 +27,7 @@ public class AspectInvoker implements MethodInterceptor {
         Object[] args = invocation.getArguments();
         Method method = invocation.getMethod();
 
-        if (!method.getName().equals(interceptor.getMethodName())) {
+        if (!method.getName().equals(interceptor.methodName)) {
             return method.invoke(obj, args);
         }
 

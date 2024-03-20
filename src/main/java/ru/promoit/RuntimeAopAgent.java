@@ -18,14 +18,17 @@ public class RuntimeAopAgent {
 
         List<AbstractInterceptor> interceptors = AspectLoadManager.initInterceptors(args);
 
-        AgentBuilder.Default agentBuilder = new AgentBuilder.Default(new ByteBuddy(ClassFileVersion.ofThisVm(ClassFileVersion.JAVA_V17)));
+        AgentBuilder agentBuilder = new AgentBuilder
+                .Default(new ByteBuddy(ClassFileVersion.ofThisVm(ClassFileVersion.JAVA_V17)))
+                .with(AgentBuilder.Listener.StreamWriting.toSystemError().withErrorsOnly())
+                .ignore(ElementMatchers.none());
 
 
         interceptors.forEach(interceptor ->
-        agentBuilder.type(ElementMatchers.hasSuperType(ElementMatchers.named(interceptor.getClazz()))
-                        .or(ElementMatchers.named(interceptor.getClazz())))
+            agentBuilder.type(ElementMatchers.hasSuperType(ElementMatchers.named(interceptor.clazz))
+                        .or(ElementMatchers.named(interceptor.clazz)))
                 .transform(((builder, typeDescription, classLoader, javaModule) -> builder
-                        .method(ElementMatchers.named(interceptor.getMethodName()))
+                        .method(ElementMatchers.named(interceptor.methodName))
                         .intercept(MethodDelegation.withDefaultConfiguration().withBinders(Morph.Binder.install(Morpher.class))
                                 .to(interceptor)))).installOn(instrumentation));
 

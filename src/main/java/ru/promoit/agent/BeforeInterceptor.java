@@ -17,13 +17,12 @@ public class BeforeInterceptor extends AbstractInterceptor {
     @RuntimeType
     @Override
     public Object intercept(@This Object object, @Origin Method method, @Morph Morpher m, @AllArguments Object[] args) throws Exception {
-        System.out.println("before aspect!");
         BeforeAspect beforeAspect = (BeforeAspect) aspect.get();
         Object[] targs = beforeAspect.beforeAdvice(object, args, beanFactory);
         if (Objects.isNull(targs)) {
             targs = args;
         }
-        Object result = Objects.isNull(m) ? method.invoke(targs) : m.invoke(targs);
+        Object result = Objects.isNull(m) ? method.invoke(object, targs) : m.invoke(targs);
         return result;
     }
 }

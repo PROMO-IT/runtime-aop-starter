@@ -12,8 +12,9 @@ public class OverrideInterceptor extends AbstractInterceptor {
         super(clazz, methodName);
     }
 
+    @RuntimeType
     @Override
-    public Object intercept(@This Object object, @Origin Method method, @Morph Morpher m, @AllArguments Object[] args) throws InvocationTargetException, IllegalAccessException {
+    public Object intercept(@This Object object, @Origin Method method, @Morph Morpher m, @AllArguments Object[] args) {
         OverrideAspect overrideAspect = (OverrideAspect) aspect.get();
         return overrideAspect.overrideAdvice(object, args, beanFactory);
     }
