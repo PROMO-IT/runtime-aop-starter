@@ -209,7 +209,14 @@ java -jar <your_app.jar> -javaagent:<path-to>\runtime-aop-starter.jar=before-org
         after-org.example.component.TestComponent2#testMethod3=ever-jdbc:select code from table_groovy limit 1;\
         override-org.example.component.TestController#test=instant-file:src/main/resources/OverrideAspect.groovy
 ```
+ And Include into dependecies
 
+```java
+<dependency>
+    <groupId>ru.promoit</groupId>
+    <artifactId>runtime-aop-starter</artifactId>
+</dependency>
+```
 
 ## Author
 https://promo-z.ru/
