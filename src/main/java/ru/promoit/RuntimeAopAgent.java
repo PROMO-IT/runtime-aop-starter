@@ -20,7 +20,7 @@ public class RuntimeAopAgent {
 
         AgentBuilder agentBuilder = new AgentBuilder
                 .Default(new ByteBuddy(ClassFileVersion.ofThisVm(ClassFileVersion.JAVA_V17)))
-                .with(AgentBuilder.Listener.StreamWriting.toSystemError().withErrorsOnly())
+//                .with(AgentBuilder.Listener.StreamWriting.toSystemError().withErrorsOnly())
                 .ignore(ElementMatchers.none());
 
 

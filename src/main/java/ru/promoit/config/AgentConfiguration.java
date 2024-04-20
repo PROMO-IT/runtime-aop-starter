@@ -11,7 +11,6 @@ import ru.promoit.loader.AspectLoadManager;
 public class AgentConfiguration {
     @Bean
     public CommandLineRunner runner(AspectLoadManager aspectLoadManager, AgentProperties properties) {
-        System.out.println("AgentProperties start config");
         return args -> aspectLoadManager.configInterceptors(properties.agentMap());
     }
 }

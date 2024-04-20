@@ -1,10 +1,12 @@
 package ru.promoit.loader;
 
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.util.StringUtils;
 import ru.promoit.agent.AbstractInterceptor;
 import ru.promoit.agent.InterceptorFactory;
 import ru.promoit.aspect.Aspect;
 import ru.promoit.aspect.AspectType;
+import ru.promoit.config.AgentProperties;
 import ru.promoit.invoke.AspectInvoker;
 import ru.promoit.loader.provider.GroovyAspectSourceProvider;
 import ru.promoit.supplier.InstantAspectSupplier;
@@ -14,6 +16,7 @@ import ru.promoit.supplier.SupplyType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,6 +41,7 @@ public class AspectLoadManager {
     }
 
     public static List<AbstractInterceptor> initInterceptors(String property) {
+        AgentProperties.setAgentMap(property);
         INTERCEPTORS.clear();
         aopProperties(property).stream()
                 .map(dto -> InterceptorFactory.create(dto.aspectType, dto.clazz, dto.method()))
@@ -46,6 +50,10 @@ public class AspectLoadManager {
     }
 
     public void configInterceptors(String property) {
+        if (Objects.isNull(property) || property.isBlank()) {
+            return;
+        }
+
         List<PropertyMapDto> aopProperties = aopProperties(property);
         if (INTERCEPTORS.size() == aopProperties.size()) {
             for (int i = 0; i < aopProperties.size(); i++) {

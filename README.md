@@ -23,19 +23,20 @@ Include into dependecies
 
 Specify property (for example)
 ```
-runtime-aop.config.aspect-map=org.example.component.TestComponent1#testMethod1=once-file:src/main/resources/BeforeAspect1.groovy;\
-  org.example.component.TestComponent2#testMethod3=ever-jdbc:select code from table_groovy limit 1;\
-  org.example.component.TestController#test=instant-file:src/main/resources/OverrideAspect.groovy
+runtime-aop.config.aspect-map=before-org.example.component.TestComponent1#testMethod1=once-file:src/main/resources/BeforeAspect1.groovy;\
+  after-org.example.component.TestComponent2#testMethod3=ever-jdbc:select code from table_groovy limit 1;\
+  override-org.example.component.TestController#test=instant-file:src/main/resources/OverrideAspect.groovy
 ```
 
 ## Details
 ### Configuring
 Property pattern
 ```java
-runtime-aop.config.aspect-map={class}#{method}={loadingMode}-{sourceType}:{sourceValue}
+runtime-aop.config.aspect-map={advice}-{class}#{method}={loadingMode}-{sourceType}:{sourceValue}
 ```
 parameter _loadingMode_:
 
+- _advice_ - should be before/after/override (loads script before/after method call or overrides it) 
 - _instant_ - loads script on starting of apllication
 - _once_ - loads script once on target method call
 - _ever_ - loads scripts every time when target method calls
@@ -77,7 +78,7 @@ public class GroovyAspectFileProvider implements GroovyAspectSourceProvider {
 }
 ```
 ```
-runtime-aop.config.aspect-map=org.example.component.TestComponent1#testMethod1=once-http:someurl.com/code.groovy
+runtime-aop.config.aspect-map=override-org.example.component.TestComponent1#testMethod1=once-http:someurl.com/code.groovy
 ```
 New _sourceType_ (http) is provided in your application
 
@@ -197,6 +198,18 @@ Injected method with OverrideAspect1 call example:
 ```java
 testComponent1.testMethod1("hello") //returns "123"
 ```
+
+## Using javaagent
+runtime-aop-starter also can be loaded as a javaagent. In this case it changes the bytecode of specified classes. It provides loading and running scripts much faster (as a native code).
+runtime-aop-starter uses _net.bytebuddy.byte-buddy_ to change the bytecode.
+
+runtime-aop-starter can be loaded as javaagent by specifying JVM option and _aspect property_ in the same format as it was below
+```java
+java -jar <your_app.jar> -javaagent:<path-to>\runtime-aop-starter.jar=before-org.example.component.TestComponent1#testMethod1=once-file:src/main/resources/BeforeAspect1.groovy;\
+        after-org.example.component.TestComponent2#testMethod3=ever-jdbc:select code from table_groovy limit 1;\
+        override-org.example.component.TestController#test=instant-file:src/main/resources/OverrideAspect.groovy
+```
+
 
 ## Author
 https://promo-z.ru/
