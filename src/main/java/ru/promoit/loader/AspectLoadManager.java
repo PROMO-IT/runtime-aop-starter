@@ -1,7 +1,6 @@
 package ru.promoit.loader;
 
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.util.StringUtils;
 import ru.promoit.agent.AbstractInterceptor;
 import ru.promoit.agent.InterceptorFactory;
 import ru.promoit.aspect.Aspect;
