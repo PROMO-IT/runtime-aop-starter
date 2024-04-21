@@ -5,9 +5,9 @@ runtime-aop-starter provides executing any injected code into specified methods 
 ## Features
 
 - Supports groovy scripts
-- injects code before specified bean method
-- injects code after specified bean method
-- overrides bean method by injected code
+- injects code before specified class method
+- injects code after specified class method
+- overrides class method by injected code
 - loads injecting code from several sources (file, jdbc, etc) in runtime
 
 ## Installation
@@ -200,7 +200,8 @@ testComponent1.testMethod1("hello") //returns "123"
 ```
 
 ## Using javaagent
-runtime-aop-starter also can be loaded as a javaagent. In this case it changes the bytecode of specified classes. It provides loading and running scripts much faster (as a native code).
+Loading runtime-aop-starter via _aspect-map_ property provides intercepting of only public bean methods. 
+runtime-aop-starter also can be loaded as a javaagent. In this case it changes the bytecode of specified classes (even private methods). It provides loading and running scripts much faster (as a native code).
 runtime-aop-starter uses _net.bytebuddy.byte-buddy_ to change the bytecode.
 
 runtime-aop-starter can be loaded as javaagent by specifying JVM option and _javaagent aspect property_ in the same format as it was below
